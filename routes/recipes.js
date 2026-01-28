@@ -1,5 +1,5 @@
 import express from "express";
-import data, { getNextRecipeId } from "../data/database.js";
+import data, { getNextRecipeId } from "../data/databases.js";
 
 const router = express.Router();
 

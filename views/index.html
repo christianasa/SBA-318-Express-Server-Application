@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="../style/styles.css">
+</head>
+<body>
+  <header>
+    <h1>🍳 Recipe Collection</h1>
+    <p>Manage your favorite recipes</p>
+  </header>
+
+  <main>
+    <section class="api-section">
+      <h2>Browse Recipes</h2>
+      <div id="recipes-container">
+        <button onclick="loadRecipes()">Load All Recipes</button>
+        <div id="recipes-list"></div>
+      </div>
+    </section>
+
+    <section class="api-section">
+      <h2>Add New Recipe</h2>
+      <form id="recipe-form">
+        <div class="form-group">
+          <label for="name">Recipe Name:</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="categoryId">Category:</label>
+          <select id="categoryId" name="categoryId">
+            <option value="">Select a category</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prepTime">Prep Time:</label>
+            <input type="text" id="prepTime" name="prepTime" placeholder="e.g., 15 minutes">
+          </div>
+
+          <div class="form-group">
+            <label for="cookTime">Cook Time:</label>
+            <input type="text" id="cookTime" name="cookTime" placeholder="e.g., 30 minutes">
+          </div>
+
+          <div class="form-group">
+            <label for="servings">Servings:</label>
+            <input type="number" id="servings" name="servings" min="1" value="4">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="instructions">Instructions:</label>
+          <textarea id="instructions" name="instructions" rows="4"></textarea>
+        </div>
+
+        <button type="submit">Add Recipe</button>
+      </form>
+      <div id="form-message"></div>
+    </section>
+
+    <section class="api-section">
+      <h2>Search Recipes</h2>
+      <div class="form-group">
+        <input type="text" id="search" placeholder="Search by name or description...">
+        <button onclick="searchRecipes()">Search</button>
+      </div>
+    </section>
+
+    <section class="api-section">
+      <h2>API Endpoints</h2>
+      <ul class="endpoint-list">
+        <li><strong>GET</strong> /api/recipes - Get all recipes</li>
+        <li><strong>GET</strong> /api/recipes/:id - Get specific recipe</li>
+        <li><strong>POST</strong> /api/recipes - Create new recipe</li>
+        <li><strong>PATCH</strong> /api/recipes/:id - Update recipe</li>
+        <li><strong>DELETE</strong> /api/recipes/:id - Delete recipe</li>
+        <li><strong>GET</strong> /api/ingredients - Get all ingredients</li>
+        <li><strong>GET</strong> /api/categories - Get all categories</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Load categories into dropdown
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        const select = document.getElementById('categoryId');
+        
+        categories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    // Load all recipes
+    async function loadRecipes() {
+      try {
+        const response = await fetch('/api/recipes');
+        const recipes = await response.json();
+        displayRecipes(recipes);
+      } catch (error) {
+        console.error('Error loading recipes:', error);
+      }
+    }
+
+    // Search recipes
+    async function searchRecipes() {
+      const searchTerm = document.getElementById('search').value;
+      try {
+        const response = await fetch(`/api/recipes?search=${encodeURIComponent(searchTerm)}`);
+        const recipes = await response.json();
+        displayRecipes(recipes);
+      } catch (error) {
+        console.error('Error searching recipes:', error);
+      }
+    }
+
+    // Display recipes
+    function displayRecipes(recipes) {
+      const container = document.getElementById('recipes-list');
+      
+      if (recipes.length === 0) {
+        container.innerHTML = '<p>No recipes found.</p>';
+        return;
+      }
+      
+      container.innerHTML = recipes.map(recipe => `
+        <div class="recipe-card">
+          <h3>${recipe.name}</h3>
+          <p>${recipe.description}</p>
+          <div class="recipe-meta">
+            <span>⏱️ Prep: ${recipe.prepTime}</span>
+            <span>🔥 Cook: ${recipe.cookTime}</span>
+            <span>🍽️ Serves: ${recipe.servings}</span>
+          </div>
+          <button onclick="deleteRecipe(${recipe.id})" class="delete-btn">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    // Handle form submission
+    document.getElementById('recipe-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const response = await fetch('/api/recipes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          const newRecipe = await response.json();
+          document.getElementById('form-message').innerHTML = 
+            `<p class="success">Recipe "${newRecipe.name}" added successfully!</p>`;
+          e.target.reset();
+          loadRecipes();
+        } else {
+          const error = await response.json();
+          document.getElementById('form-message').innerHTML = 
+            `<p class="error">Error: ${error.error.message}</p>`;
+        }
+      } catch (error) {
+        console.error('Error adding recipe:', error);
+        document.getElementById('form-message').innerHTML = 
+          `<p class="error">Error adding recipe</p>`;
+      }
+    });
+
+    // Delete recipe
+    async function deleteRecipe(id) {
+      if (!confirm('Are you sure you want to delete this recipe?')) return;
+      
+      try {
+        const response = await fetch(`/api/recipes/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          loadRecipes();
+        }
+      } catch (error) {
+        console.error('Error deleting recipe:', error);
+      }
+    }
+
+    // Load categories when page loads
+    loadCategories();
+  </script>
+</body>
+</html>

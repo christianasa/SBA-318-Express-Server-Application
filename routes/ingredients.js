@@ -1,5 +1,5 @@
 import express from "express";
-import data, { getNextIngredientId } from "../data/database.js";
+import data, { getNextIngredientId } from "../data/databases.js";
 
 const router = express.Router();
 
