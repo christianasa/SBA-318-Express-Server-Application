@@ -1,4 +1,4 @@
-// sample data
+// In-memory data storage with sample data
 const data = {
   recipes: [
     {

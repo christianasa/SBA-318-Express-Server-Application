@@ -1,13 +1,13 @@
 // Custom middleware functions
 
-// Request logger
+// Middleware #1: Request logger
 export function logger(req, res, next) {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} ${req.url}`);
   next();
 }
 
-// Request timer
+// Middleware #2: Request timer
 export function requestTimer(req, res, next) {
   req.startTime = Date.now();
   
@@ -19,7 +19,7 @@ export function requestTimer(req, res, next) {
   next();
 }
 
-// ABT
+// Error handling middleware
 export function errorHandler(err, req, res, next) {
   console.error('Error occurred:', err.message);
   

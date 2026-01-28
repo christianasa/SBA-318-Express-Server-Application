@@ -6,7 +6,7 @@ import fs from "fs";
 import recipesRouter from "./routes/recipes.js";
 import ingredientsRouter from "./routes/ingredients.js";
 import categoriesRouter from "./routes/categories.js";
-import { logger, requestTimer, errorHandler } from "./middleware/middlewares.js";
+import { logger, requestTimer, errorHandler } from "./Middleware/middlewares.js";
 
 // Setup 
 const __filename = fileURLToPath(import.meta.url);
