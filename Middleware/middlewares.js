@@ -1,13 +1,13 @@
-// Custom middleware functions
+// Functions
 
-// Middleware #1: Request logger
+// Request logger
 export function logger(req, res, next) {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} ${req.url}`);
   next();
 }
 
-// Middleware #2: Request timer
+// Request timer
 export function requestTimer(req, res, next) {
   req.startTime = Date.now();
   
