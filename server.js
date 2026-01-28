@@ -8,7 +8,7 @@ import ingredientsRouter from "./routes/ingredients.js";
 import categoriesRouter from "./routes/categories.js";
 import { logger, requestTimer, errorHandler } from "./middleware/middlewares.js";
 
-// Setup
+// Setup 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -52,10 +52,10 @@ app.use("/api/recipes", recipesRouter);
 app.use("/api/ingredients", ingredientsRouter);
 app.use("/api/categories", categoriesRouter);
 
-// Error handling middleware (must be last)
+// Error handling middleware 
 app.use(errorHandler);
 
-// Listner 
+// Listener
 app.listen(PORT, () => {
   console.log(`Recipe Collection server running on http://localhost:${PORT}`);
 });
